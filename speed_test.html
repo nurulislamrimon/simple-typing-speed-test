@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Typing Speed Test</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background-color: #f0f0f0;
+        margin: 0;
+      }
+      .container {
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        max-width: 700px;
+        width: 100%;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        text-align: center;
+      }
+      h1 {
+        margin-bottom: 20px;
+      }
+      #textToType {
+        font-size: 18px;
+        line-height: 1.5;
+        padding: 10px;
+        background-color: #f9f9f9;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        white-space: pre-wrap;
+      }
+      #inputArea {
+        width: 100%;
+        height: 40px;
+        font-size: 18px;
+        padding: 10px;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+        margin-bottom: 10px;
+      }
+      #timer {
+        font-size: 20px;
+        margin-bottom: 10px;
+      }
+      #result {
+        margin-top: 20px;
+        font-size: 18px;
+        font-weight: bold;
+      }
+      .correct {
+        color: green;
+      }
+      .incorrect {
+        color: red;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Typing Speed Test</h1>
+      <div id="textToType"></div>
+      <div id="timer">Time left: 60s</div>
+      <input type="text" id="inputArea" placeholder="Start typing here..." />
+      <div id="result"></div>
+    </div>
+
+    <script>
+      const texts = [
+        "Politeness means the quality of being polite. It is one of the great virtues of man. Politeness imbibes a man to be free, frank and amiable to other. He has no ill feelings or enmity to other. He does not show any haughty behaviour in front of other. A polite man respects his superiors and loves his youngest. He is tolerant and forgiving.",
+        "Food help to keep us alive. It is vitally important. We live on food. We have to eat moderate food. If it is excess, it becomes dangerous. There are some people who are habituated to voracious eating. They devour everything. This over-eating tendency may create different problems. Our stomach has to work hard if we eat too much. Stomach disorder is the most common problem of over-eating.",
+        "Man must eat suitable and temperate foods. We should select delicious and nutritious food for better and smooth living. We have to follow the rules of health. We have to be aware of the consequences of over-eating. We must bear in mind that 'Man dies not from less eating but from over-eating'.",
+        "We, the undersigned residents of village bollobpur, beg most respectfully to state that there is no tube-well in our village. Our woman have to fetch water from the distant village. Sometimes our villagers are compelled to drink water from the ponds. It creates water borne diseases. ",
+      ];
+
+      let timeLeft = 60;
+      let timer;
+      let testStarted = false;
+      let mistakes = 0;
+      let currentText = "";
+      let correctChars = 0;
+
+      const textToTypeElement = document.getElementById("textToType");
+      const inputArea = document.getElementById("inputArea");
+      const timerElement = document.getElementById("timer");
+      const resultElement = document.getElementById("result");
+
+      function initTest() {
+        currentText = getRandomText();
+        displayTextToType(currentText);
+        inputArea.value = "";
+        inputArea.disabled = false;
+        inputArea.focus();
+      }
+
+      function getRandomText() {
+        return texts[Math.floor(Math.random() * texts.length)];
+      }
+
+      function displayTextToType(text) {
+        textToTypeElement.innerHTML = "";
+        text.split("").forEach((char, idx) => {
+          const span = document.createElement("span");
+          span.innerText = char;
+          textToTypeElement.appendChild(span);
+        });
+      }
+
+      function startTimer() {
+        if (!testStarted) {
+          testStarted = true;
+          timer = setInterval(updateTimer, 1000);
+        }
+      }
+
+      function updateTimer() {
+        if (timeLeft > 0) {
+          timeLeft--;
+          timerElement.innerText = `Time left: ${timeLeft}s`;
+        } else {
+          endTest();
+        }
+      }
+
+      function handleTyping() {
+        startTimer();
+        const typedValue = inputArea.value;
+        const textSpans = textToTypeElement.querySelectorAll("span");
+
+        correctChars = 0;
+        mistakes = 0;
+
+        typedValue.split("").forEach((char, idx) => {
+          if (textSpans[idx]) {
+            if (char === currentText[idx]) {
+              textSpans[idx].classList.add("correct");
+              textSpans[idx].classList.remove("incorrect");
+              correctChars++;
+            } else {
+              textSpans[idx].classList.add("incorrect");
+              textSpans[idx].classList.remove("correct");
+              mistakes++;
+            }
+          }
+        });
+
+        if (typedValue.length >= currentText.length) {
+          endTest();
+        }
+      }
+
+      function endTest() {
+        clearInterval(timer);
+        inputArea.disabled = true;
+        const wordsTyped = inputArea.value.trim().split(/\s+/).length;
+        const wpm = Math.round(wordsTyped / ((60 - timeLeft) / 60));
+        const accuracy = Math.max(
+          0,
+          Math.round((correctChars / currentText.length) * 100)
+        );
+
+        resultElement.innerHTML = `WPM: ${wpm} <br> Accuracy: ${accuracy}%`;
+      }
+
+      inputArea.addEventListener("input", handleTyping);
+
+      window.onload = initTest;
+    </script>
+  </body>
+</html>
